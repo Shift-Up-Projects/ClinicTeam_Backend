@@ -2,13 +2,17 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Exports\UserExporter;
 use App\Filament\Filters\DateRangeFilter;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -34,6 +38,7 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('email')
                     ->url(fn (User $record): string => 'mailto:' . $record->email)
+                    ->icon('heroicon-o-envelope')
                     ->searchable()
                     ->openUrlInNewTab(),
                 TextColumn::make('email_verified_at')
@@ -69,6 +74,9 @@ class UsersTable
 
                 TextColumn::make('mobile')
                     ->label('Mobile')
+                    ->alignLeft()
+                    ->icon('heroicon-o-phone')
+                    ->weight(FontWeight::Medium)
                     ->alignCenter()
                     ->default('-')
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -106,6 +114,9 @@ class UsersTable
 
                 DateRangeFilter::make('created_at')
             ])
+            ->headerActions([
+               ExportAction::make()->exporter(UserExporter::class),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
@@ -114,7 +125,11 @@ class UsersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ExportBulkAction::make()
+                        ->exporter(UserExporter::class),
                 ]),
-            ]);
+            ])
+            ->striped()
+            ->deferLoading();
     }
 }
